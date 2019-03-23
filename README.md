@@ -1,1 +1,1 @@
-# GMDA
+# GMDA course
