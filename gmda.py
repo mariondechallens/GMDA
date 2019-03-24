@@ -108,10 +108,10 @@ TST_MMD(g1,g3)
 
 def JS(p, q):
 
-    if (len(q.shape) == 2):
-        axis = 1
-    else:
+    if (len(q.shape) == 1):
         axis = 0
+    else:
+        axis = 1
 
     # D_{JS}(P\|Q) = (D_{KL}(P\|Q) + D_{KL}(Q\|P)) / 2
 
@@ -124,4 +124,20 @@ def JS(p, q):
                               - np.log(q.clip(1e-10,1)))).sum(axis))
 
 
-JS(g1,g2)
+g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
+g2 = gaussian_mix(d=1,N=3,t=1,n=500) 
+JSobs = JS(g1,g2) 
+
+#permutation test / bootstrap
+import random
+
+N=100
+res = []
+for i in range(N):
+    g3 = np.concatenate([g1[0],g2[0]])
+    g = random.sample(list(g3),len(g1[0])) #new g1
+    gg = [x for x in g3 if x not in g]#new g2
+    res.append(JS(np.array(g),np.array(gg)))
+
+p_value = sum(res>JSobs)/N
+p_value
