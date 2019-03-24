@@ -21,7 +21,7 @@ def gaussian_mix(d,N,t,n,s=1):
             
     return(res)  
     
-data = gaussian_mix(2,3,4,1.1,500)    
+data = gaussian_mix(d=2,N=3,t=4,n=500)    
 plt.plot(data[0],data[1])    
 
 
@@ -33,29 +33,48 @@ def gauss_kernel(x,y,s=1):
     k = np.exp(-sum((x-y)**2)/(2*(s**2)))
     return k
 
-#MMD^2 entre deux gauss mix
-def MMD2(g1,g2):         ### à optimiser !!
+#MMD entre deux gauss mix
+def MMD(g1,g2):         ### à optimiser !!
     n = len(g1[0])
     m = len(g2[0])
-    MMD2 = 0
+    MMD = 0
     for i in range(n):
         for j in range(n):
-            MMD2 += gauss_kernel(g1.T[i],g1.T[j])
-    MMD2 /= n**2
+            MMD += gauss_kernel(g1.T[i],g1.T[j])/n**2
     
     for i in range(m):
         for j in range(m):
-            MMD2 += gauss_kernel(g2.T[i],g2.T[j])
-    MMD2 /= m**2
+            MMD += gauss_kernel(g2.T[i],g2.T[j])/m**2
     
     for i in range(n):
         for j in range(m):
-            MMD2 -= gauss_kernel(g1.T[i],g2.T[j])
-    MMD2 /= 2/(m*n)
-    
-    return(MMD2)
+            MMD -= 2*gauss_kernel(g1.T[i],g2.T[j])/(m*n)
+    MMD = np.sqrt(MMD)
+    return(MMD)
   
-MMD2(g1,g2)  
+g1 = gaussian_mix(d=1,N=1,t=4,n=500) 
+g2 = gaussian_mix(d=1,N=1,t=4,n=500)     
+MMD(g1,g2)  
 
+def threshold(n,alpha):  # gauss kernel <=1, K = 1
+    t = np.sqrt(2/n)*(1+np.sqrt(2*np.log(1/alpha)))  #need n=m
+    return(t)
+
+threshold(len(g1[0]),0.05)    
+
+from itertools import product   
+
+def MMD2(g1,g2): # moins long ?
+    n = len(g1[0])
+    m = len(g2[0])
     
+    mmd1 = [gauss_kernel(g1.T[i],g1.T[j])/n**2 for i,j in product(range(n),range(n))]
+    mmd2 = [gauss_kernel(g2.T[i],g2.T[j])/m**2 for i,j in product(range(m),range(m))]
+    mmd3 = [-2*gauss_kernel(g1.T[i],g2.T[j])/(m*n) for i,j in product(range(n),range(m))]
+    
+    MMD = np.sqrt(sum(mmd1) + sum(mmd2) + sum(mmd3))
+    
+    return(MMD) 
+
+MMD2(g1,g2)     
     
