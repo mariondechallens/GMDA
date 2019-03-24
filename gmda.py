@@ -127,14 +127,14 @@ def JS(p, q):
 g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
 g2 = gaussian_mix(d=1,N=3,t=1,n=500) 
 JSobs = JS(g1,g2) 
+JSobs
 
 #permutation test / bootstrap
 import random
-
-N=100
+g3 = np.concatenate([g1[0],g2[0]])
+N=1000
 res = []
-for i in range(N):
-    g3 = np.concatenate([g1[0],g2[0]])
+for i in range(N):   
     g = random.sample(list(g3),len(g1[0])) #new g1
     gg = [x for x in g3 if x not in g]#new g2
     res.append(JS(np.array(g),np.array(gg)))
