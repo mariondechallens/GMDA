@@ -52,15 +52,11 @@ def MMD(g1,g2):         ### à optimiser !!
     MMD = np.sqrt(MMD)
     return(MMD)
   
-g1 = gaussian_mix(d=1,N=1,t=4,n=500) 
-g2 = gaussian_mix(d=1,N=1,t=4,n=500)     
-MMD(g1,g2)  
-
-def threshold(n,alpha):  # gauss kernel <=1, K = 1
+    
+def threshold(n,alpha=0.05):  # gauss kernel <=1, K = 1
     t = np.sqrt(2/n)*(1+np.sqrt(2*np.log(1/alpha)))  #need n=m
     return(t)
-
-threshold(len(g1[0]),0.05)    
+   
 
 from itertools import product   
 
@@ -76,5 +72,25 @@ def MMD2(g1,g2): # moins long ?
     
     return(MMD) 
 
-MMD2(g1,g2)     
     
+def TST_MMD(g1,g2,alpha=0.05):
+    
+    if len(g1[0]) != len(g1[0]):
+        print('data have to have the same number of points')
+        mmd = 0
+        t = 0
+
+    else:
+        mmd = MMD2(g1,g2)
+        t = threshold(len(g1[0]), alpha)
+        if mmd <= t:
+            print('H0 accepted at level ',alpha)
+        else:
+            print('H0 rejected at level ',alpha)
+    
+    return mmd, t
+
+g1 = gaussian_mix(d=2,N=1,t=4,n=500) 
+g2 = gaussian_mix(d=2,N=1,t=4,n=500) 
+
+TST_MMD(g1,g2)
