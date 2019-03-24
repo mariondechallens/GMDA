@@ -74,23 +74,54 @@ def MMD2(g1,g2): # moins long ?
 
     
 def TST_MMD(g1,g2,alpha=0.05):
-    
+    if len(g1) != len(g2):
+        print('data must have the same dimension')
+        mmd = 0
+        t=0
+        
     if len(g1[0]) != len(g1[0]):
-        print('data have to have the same number of points')
+        print('data must have the same number of points')
         mmd = 0
         t = 0
 
-    else:
+    if len(g1) == len(g2) and len(g1[0]) == len(g1[0]) :
         mmd = MMD2(g1,g2)
         t = threshold(len(g1[0]), alpha)
         if mmd <= t:
-            print('H0 accepted at level ',alpha)
+            print('H0 accepted at level',alpha)
         else:
-            print('H0 rejected at level ',alpha)
+            print('H0 rejected at level',alpha)
     
     return mmd, t
 
-g1 = gaussian_mix(d=2,N=1,t=4,n=500) 
-g2 = gaussian_mix(d=2,N=1,t=4,n=500) 
+g1 = gaussian_mix(d=3,N=3,t=1,n=500) 
+g2 = gaussian_mix(d=3,N=3,t=12,n=500) 
+g3 = gaussian_mix(d=3,N=3,t=1,n=500)
 
 TST_MMD(g1,g2)
+TST_MMD(g1,g3)
+
+
+### Task 4 : feedback with JS divergence
+# permutation test
+# https://github.com/skerit/cmusphinx/blob/master/SphinxTrain/python/cmusphinx/divergence.py
+
+def JS(p, q):
+
+    if (len(q.shape) == 2):
+        axis = 1
+    else:
+        axis = 0
+
+    # D_{JS}(P\|Q) = (D_{KL}(P\|Q) + D_{KL}(Q\|P)) / 2
+
+    return 0.5 * ((q * (np.log(q.clip(1e-10,1))
+
+                        - np.log(p.clip(1e-10,1)))).sum(axis)
+
+                      + (p * (np.log(p.clip(1e-10,1))
+
+                              - np.log(q.clip(1e-10,1)))).sum(axis))
+
+
+JS(g1,g2)
