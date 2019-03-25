@@ -125,7 +125,7 @@ def JS(p, q):
 
 
 g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
-g2 = gaussian_mix(d=1,N=3,t=1,n=500) 
+g2 = gaussian_mix(d=1,N=3,t=12,n=500) 
 JSobs = JS(g1,g2) 
 JSobs
 
@@ -139,5 +139,5 @@ for i in range(N):
     gg = [x for x in g3 if x not in g]#new g2
     res.append(JS(np.array(g),np.array(gg)))
 
-p_value = sum(res>JSobs)/N
+p_value = sum(res>JSobs)/N  #ne fonctionne pas
 p_value
