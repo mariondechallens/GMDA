@@ -102,7 +102,7 @@ TST_MMD(g1,g2)
 TST_MMD(g1,g3)
 
 
-### Task 4 : feedback with JS divergence
+### Task 4 : TST versus feedback under the null hypothesis : p=q
 # permutation test
 # https://github.com/skerit/cmusphinx/blob/master/SphinxTrain/python/cmusphinx/divergence.py
 
@@ -122,22 +122,35 @@ def JS(p, q):
                       + (p * (np.log(p.clip(1e-10,1))
 
                               - np.log(q.clip(1e-10,1)))).sum(axis))
-
-
+# H0 : p=q
 g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
-g2 = gaussian_mix(d=1,N=3,t=12,n=500) 
-JSobs = JS(g1,g2) 
-JSobs
+g2 = gaussian_mix(d=1,N=3,t=1,n=500) 
+
+
 
 #permutation test / bootstrap
 import random
-g3 = np.concatenate([g1[0],g2[0]])
-N=1000
-res = []
-for i in range(N):   
-    g = random.sample(list(g3),len(g1[0])) #new g1
-    gg = [x for x in g3 if x not in g]#new g2
-    res.append(JS(np.array(g),np.array(gg)))
+def permut(g1,g2,N):
+    JSobs = JS(g1,g2) 
+    g3 = np.concatenate([g1[0],g2[0]])
+    n = len(g3)//2
+    res = []
+    for i in range(N):   
+        g = random.sample(list(g3),len(g3))
+        res.append(JS(np.array(g[:n]),np.array(g[n:])))
+    p_value = sum(res>JSobs)/N  #ne fonctionne pas : pb avec la JS div 
+    return res, p_value
 
-p_value = sum(res>JSobs)/N  #ne fonctionne pas
-p_value
+permut(g1,g2,1000)  #H0 accepted
+TST_MMD(g1,g2) #H0 accepted
+
+### Task 5: TST versus feedback under the alternative  p!=q and order of magnitude
+g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
+g2 = gaussian_mix(d=1,N=3,t=2,n=500) 
+g3 = gaussian_mix(d=1,N=3,t=3,n=500) 
+g4 = gaussian_mix(d=1,N=3,t=5,n=500) 
+g5 = gaussian_mix(d=1,N=3,t=10,n=500) 
+g6 = gaussian_mix(d=1,N=3,t=15,n=500) 
+
+TST_MMD(g1,g6) # H0 rejected
+permut(g1,g6,1000) # h0 accepted 
