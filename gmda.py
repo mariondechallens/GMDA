@@ -4,6 +4,7 @@ Created on Sat Mar 23 11:01:03 2019
 
 @author: Admin
 """
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -154,3 +155,63 @@ g6 = gaussian_mix(d=1,N=3,t=15,n=500)
 
 TST_MMD(g1,g6) # H0 rejected
 permut(g1,g6,1000) # h0 accepted 
+
+
+#### autre methode
+import math
+
+def f(pcond,param):
+    if pcond == 0:
+        return 0
+    else:
+        return math.log(pcond/param,2)
+    
+def JS2(pcond,param):
+    js = pcond *  f(pcond,param) + (1-pcond) *  f(1-pcond,1-param)
+    return js
+
+# calculer proba conditionnelle avec knn
+g1 = gaussian_mix(d=1,N=3,t=1,n=500) 
+g2 = gaussian_mix(d=1,N=3,t=2,n=500) 
+data =pd.DataFrame({'g1':g1[0], 'g2':g2[0]})
+
+def labeling(data):
+
+        counts = {0:0, 1:0}
+        
+        stop = False
+        #generate sequence of labels until no more samples available from one population
+        while not stop:
+            label = random.randint(0,1)
+            if counts[label] == data.iloc[:,label].shape[0]:
+                stop = True
+            else:
+                counts[label] += 1
+
+        #uniformly draw them from the two populations
+        #create the arrays for points and labels
+        nsampled = sum(counts.values())
+        dim = 1
+        points = np.ndarray(shape=(nsampled,dim))
+        labels = np.ndarray(shape=(nsampled,))
+
+
+        points[0:counts[0],:] = data.iloc[:,0][[random.sample(range(data.iloc[:,0].shape[0]),counts[0])]]
+        labels[0:counts[0]] = np.zeros((counts[0],))
+
+        points[counts[0]:,:] = data.iloc[:,1][[random.sample(range(data.iloc[:,1].shape[0]),counts[1])]]
+        labels[counts[0]:] = np.ones((counts[1],))
+
+
+        return points, labels
+    
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=3)
+points, labels = labeling(data)
+knn.fit(points,labels)
+d = data.iloc[:,0]
+dd = data.iloc[:,1]
+pcond1 = knn.predict_proba(np.array(d).reshape(len(d),1))
+pcond2 = knn.predict_proba(np.array(dd).reshape(len(dd),1))
+   
+
