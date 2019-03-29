@@ -154,7 +154,7 @@ g5 = gaussian_mix(d=1,N=3,t=10,n=500)
 g6 = gaussian_mix(d=1,N=3,t=15,n=500) 
 
 TST_MMD(g1,g6) # H0 rejected
-permut(g1,g6,1000) # h0 accepted 
+permut(g1,g6,1000) # H0 accepted 
 
 
 #### autre methode
@@ -195,11 +195,13 @@ def labeling(data):
         points = np.ndarray(shape=(nsampled,dim))
         labels = np.ndarray(shape=(nsampled,))
 
-
-        points[0:counts[0],:] = data.iloc[:,0][[random.sample(range(data.iloc[:,0].shape[0]),counts[0])]]
+        
+        pt = np.array([data.iloc[:,0][i] for i in random.sample(range(data.iloc[:,0].shape[0]),counts[0]) ])
+        points[0:counts[0],:] = pt.reshape(pt.shape[0],1)
         labels[0:counts[0]] = np.zeros((counts[0],))
 
-        points[counts[0]:,:] = data.iloc[:,1][[random.sample(range(data.iloc[:,1].shape[0]),counts[1])]]
+        ptt = np.array([data.iloc[:,1][i] for i in random.sample(range(data.iloc[:,1].shape[0]),counts[1]) ])
+        points[counts[0]:,:] = ptt.reshape(ptt.shape[0],1)
         labels[counts[0]:] = np.ones((counts[1],))
 
 
@@ -214,4 +216,10 @@ dd = data.iloc[:,1]
 pcond1 = knn.predict_proba(np.array(d).reshape(len(d),1))
 pcond2 = knn.predict_proba(np.array(dd).reshape(len(dd),1))
    
+JSDTable = np.ndarray(shape=(data.iloc[:,0].shape[0]+data.iloc[:,1].shape[0],1))
 
+def g(pcond):
+    return JS2(pcond,1)
+
+JSDTable[0:pcond1.shape[0],0] = list(map(g,pcond1[:,0]))
+JSDTable[pcond2.shape[0]:,0] = list(map(g,pcond2[:,0]))
