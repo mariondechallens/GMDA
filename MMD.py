@@ -62,6 +62,7 @@ class MMD_test(object):
         if self.biased:
             self.threshold = np.sqrt(2 * K / n) * (1 + np.sqrt(2 * np.log(1 / self.alpha)))  # need n=m
         else:
+            # TODO : implement unbiased estimator
             raise NotImplementedError
 
     def get_results(self):
