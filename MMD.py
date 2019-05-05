@@ -10,10 +10,10 @@ class MMD_test(object):
     Inspired by "A Kernel Two-Sample Test", J. of Machine Learning Research (13), 2012, Gretton & Al.
     """
 
-    def __init__(self, kernel_class: Kernel, alpha=0.05, biased=True):
+    def __init__(self, kernel_class: Kernel, alpha_c=0.95, biased=True):
         self.kernel_class = kernel_class
-        self.alpha = alpha
-        self.biased = biased
+        self.alpha_c = alpha_c  # confidence level and not type I error
+        self.biased = biased  # if True, use MMD_b, else MMD_u as test statistic
         self.T = None  # value of test statistic
         self.threshold = None  # threshold
         self.kernel = None  # kernel value
@@ -21,10 +21,10 @@ class MMD_test(object):
         self.Y = None  # second set of data
         self.test_result = ""  # accepted or rejected
 
-    def fit(self, X, Y, verbose=True):
+    def fit(self, X, Y, verbose=True, out=True):
         """
         Compute TST MMD test for a given set of samples X^(m) and Y^(n) using kernel self.kernel,
-        at given level self.alpha, using self.biased or not estimator.
+        at given level self.alpha_c, using self.biased or not estimator.
         :param X: first set of samples, of shape (n_features, m)
         :param Y: second set of samples, of shape (n_features, n)
         :param verbose: print results or not at the end
@@ -59,7 +59,7 @@ class MMD_test(object):
             print(self)
 
     def __repr__(self):
-        text = f"MMD test of level alpha={self.alpha}, biased={self.biased} estimator\n"
+        text = f"MMD test of level alpha_c={self.alpha_c}, biased={self.biased} estimator\n"
         text += repr(self.kernel_class)
         if (self.T is not None) and (self.threshold is not None):
             if self.T <= self.threshold:
@@ -70,14 +70,14 @@ class MMD_test(object):
 
     def compute_threshold(self):
         """
-        :return: Acceptance threshold for H0 at threshold alpha given that the estimator is biased or not
+        :return: Acceptance threshold for H0 at threshold alpha_c given that the estimator is biased or not
         """
         n = self.X.shape[1]
         K = self.kernel_class.K
         if self.biased:
-            self.threshold = np.sqrt(2 * K / n) * (1 + np.sqrt(2 * np.log(1 / self.alpha)))  # need n=m
+            self.threshold = np.sqrt(2 * K / n) * (1 + np.sqrt(2 * np.log(1 / self.alpha_c)))  # need n=m
         else:
-            self.threshold = 4 * K * np.sqrt(np.log(1 / self.alpha) / n)
+            self.threshold = 4 * K * np.sqrt(np.log(1 / self.alpha_c) / n)
 
     def get_results(self):
         return {"test_result": self.test_result, "test_statistic": self.T, "threshold": self.threshold}

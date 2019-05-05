@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def gaussian_mix(d,N,t,n,s=1, seed=1):
+def gaussian_mix(d, N, t, n, s=1, seed=1):
     np.random.seed(seed)
     cov = np.identity(d)
     mean = np.zeros(d)
@@ -12,4 +12,4 @@ def gaussian_mix(d,N,t,n,s=1, seed=1):
         for j in range(d):
             res[j][i*n:(i+1)*n] = gaus[j]
             
-    return(res)
+    return res
